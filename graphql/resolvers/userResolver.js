@@ -14,7 +14,7 @@ const userResolvers = {
   },
   Mutation: {
     createUser: async (_, args, context) => {
-      // const user = authenticate(context.req);
+      const user = authenticate(context.req);
       return await userService.createUser(args);
     },
   },
