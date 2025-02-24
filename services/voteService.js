@@ -1,2 +1,9 @@
-// Keeps GraphQL resolvers clean and testable.
-// If you switch from MongoDB to PostgreSQL later, you only modify this file.
+const Vote = require('../models/Vote');
+
+const voteService = {
+  getVotes: async () => await Vote.find(),
+  getVoteById: async (id) => await Vote.findById(id),
+  createVote: async (voteData) => await Vote.create(voteData),
+};
+
+module.exports = voteService;
