@@ -1,4 +1,5 @@
-const userService = require('../services/userService');
+const userService = require('../../services/userService');
+const authenticate = require('../../middleware/authMiddleware');
 
 const userResolvers = {
   Query: {
