@@ -17,7 +17,8 @@ connectDB();
 async function startServer() {
   const server = new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    context: ({ req }) => ({ req }), // Pass req to resolvers
   });
 
   await server.start();
