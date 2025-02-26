@@ -101,10 +101,82 @@ describe("GraphQL API Tests", () => {
       .send({ query: mutation });
 
     expect(response.status).toBe(200);
+    expect(response.body.data).toHaveProperty("createUser");
     expect(response.body.data.createUser).toEqual({
       id: "2",
       name: "New User",
       email: "new@example.com"
     });
   });
+
+  it("should return an error when creating a user with missing fields", async () => {
+    const mutation = `
+      mutation {
+        createUser(name: "", email: "", age: 30, gender: "Male", polling: "001", designation: "Developer", location: "Nairobi", idnumber: "12345678", voted: false) {
+          id
+          name
+          email
+        }
+      }
+    `;
+  
+    const response = await request(app)
+      .post('/graphql')
+      .send({ query: mutation });
+  
+    // GraphQL always returns 200, but errors will be inside response.body.errors
+    expect(response.status).toBe(200); 
+    expect(response.body).toHaveProperty("errors"); // Check if errors exist
+    expect(response.body.errors[0].message).toMatch(/Missing required field/); // Validate the error message
+  });
+
+  it("should handle large user lists efficiently", async () => {
+    const largeData = Array.from({ length: 10000 }, (_, i) => ({
+      id: i.toString(),
+      name: `User ${i}`,
+      email: `user${i}@example.com`,
+    }));
+  
+    require('../services/userService').getUsers.mockResolvedValue(largeData);
+  
+    const query = `
+      query {
+        getUsers {
+          id
+          name
+          email
+        }
+      }
+    `;
+  
+    const response = await request(app)
+      .post('/graphql')
+      .send({ query });
+  
+    expect(response.status).toBe(200);
+    expect(response.body.data.getUsers).toHaveLength(10000);
+  });
+
+  it("should return null for a non-existent user", async () => {
+    const query = `
+      query {
+        getUser(id: "999") {
+          id
+          name
+          email
+        }
+      }
+    `;
+  
+    // Mock service to return null for unknown ID
+    require('../services/userService').getUserById.mockResolvedValue(null);
+  
+    const response = await request(app)
+      .post('/graphql')
+      .send({ query });
+  
+    expect(response.status).toBe(200);
+    expect(response.body.data.getUser).toBeNull();
+  });
+  
 });

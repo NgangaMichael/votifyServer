@@ -15,6 +15,16 @@ const userResolvers = {
   Mutation: {
     createUser: async (_, args, context) => {
       const user = authenticate(context.req);
+
+      // List of required fields
+      const requiredFields = ["name", "email", "age", "gender", "polling", "designation", "location", "idnumber"];
+
+      for (const field of requiredFields) {
+        if (!args[field]) {
+          throw new Error(`Missing required field: ${field}`);
+        }
+      }
+
       return await userService.createUser(args);
     },
   },
